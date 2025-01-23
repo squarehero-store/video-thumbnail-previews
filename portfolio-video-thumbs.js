@@ -176,7 +176,7 @@ window.onload = function() {
             // Load CSS
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/portfolio-video-thumbnails@0/portfolio-vide-thumbs.min.css?v=' + new Date().getTime();
+            link.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/portfolio-video-thumbnails@0/portfolio-video-thumbs.min.css?v=' + new Date().getTime();
             document.head.appendChild(link);
 
             // Load HLS.js first
