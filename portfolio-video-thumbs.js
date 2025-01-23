@@ -4,6 +4,8 @@ window.onload = function() {
     const videoMeta = document.querySelector('meta[squarehero-plugin="portfolio-video-thumbnails"]');
     const isEnabled = videoMeta ? videoMeta.getAttribute('enabled') === 'true' : false;
     const videoTarget = videoMeta ? videoMeta.getAttribute('target') || 'video-thumbnails' : 'video-thumbnails';
+    const style = videoMeta ? videoMeta.getAttribute('style') : null;
+    const isHoverEnabled = style === 'hover';
 
     if (isEnabled) {
         (function() {
@@ -54,22 +56,31 @@ window.onload = function() {
                 }
             }
 
-            function getProjectId(href) {
-                const match = href.match(/\/portfolio\/([^\/]+)/);
-                return match ? match[1] : null;
+            function getProjectId(item) {
+                if (!item.closest('#gridThumbs .grid-item')) return null;
+                return item.href.split('/').filter(Boolean).pop() || null;
             }
 
             function createVideoElement(videoDetails, img) {
                 const videoWrapper = document.createElement('div');
                 videoWrapper.className = 'video-wrapper';
+                if (isHoverEnabled) {
+                    videoWrapper.style.opacity = '0';
+                    videoWrapper.style.transition = 'opacity 0.3s ease-in-out';
+                }
 
                 if (videoDetails.provider === 'squarespace') {
                     const video = document.createElement('video');
                     video.muted = true;
-                    video.autoplay = true;
                     video.loop = true;
                     video.playsInline = true;
                     video.controls = false;
+                    
+                    if (isHoverEnabled) {
+                        video.autoplay = false;
+                    } else {
+                        video.autoplay = true;
+                    }
 
                     if (Hls.isSupported()) {
                         const hls = new Hls({
@@ -78,22 +89,26 @@ window.onload = function() {
                         });
                         hls.loadSource(videoDetails.url);
                         hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            video.play()
-                                .then(() => {
-                                    if (img) img.style.opacity = '0';
-                                })
-                                .catch(e => console.error('Error playing video:', e));
-                        });
+                        if (!isHoverEnabled) {
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                video.play()
+                                    .then(() => {
+                                        if (img) img.style.opacity = '0';
+                                    })
+                                    .catch(e => console.error('Error playing video:', e));
+                            });
+                        }
                     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                         video.src = videoDetails.url;
-                        video.addEventListener('loadedmetadata', () => {
-                            video.play()
-                                .then(() => {
-                                    if (img) img.style.opacity = '0';
-                                })
-                                .catch(e => console.error('Error playing video:', e));
-                        });
+                        if (!isHoverEnabled) {
+                            video.addEventListener('loadedmetadata', () => {
+                                video.play()
+                                    .then(() => {
+                                        if (img) img.style.opacity = '0';
+                                    })
+                                    .catch(e => console.error('Error playing video:', e));
+                            });
+                        }
                     }
                     videoWrapper.appendChild(video);
                 } else {
@@ -130,9 +145,11 @@ window.onload = function() {
                             iframe.style.width = `${width}px`;
                             iframe.style.height = `${height}px`;
 
-                            setTimeout(() => {
-                                if (img) img.style.opacity = '0';
-                            }, 1000);
+                            if (!isHoverEnabled) {
+                                setTimeout(() => {
+                                    if (img) img.style.opacity = '0';
+                                }, 1000);
+                            }
                         });
                     } else if (videoDetails.provider === 'vimeo') {
                         const videoId = videoDetails.embedUrl.split('/').pop();
@@ -156,7 +173,7 @@ window.onload = function() {
                 const videoMap = await fetchVideoThumbnails();
                 
                 gridItems.forEach(item => {
-                    const projectId = getProjectId(item.href);
+                    const projectId = getProjectId(item);
                     if (!projectId) return;
 
                     const videoDetails = videoMap.get(projectId);
@@ -168,6 +185,22 @@ window.onload = function() {
                     const img = imageWrapper.querySelector('img');
                     const videoElement = createVideoElement(videoDetails, img);
                     if (!videoElement) return;
+
+                    if (isHoverEnabled) {
+                        item.addEventListener('mouseenter', () => {
+                            videoElement.style.opacity = '1';
+                            if (img) img.style.opacity = '0';
+                            const video = videoElement.querySelector('video');
+                            if (video) video.play().catch(e => console.error('Error playing video:', e));
+                        });
+
+                        item.addEventListener('mouseleave', () => {
+                            videoElement.style.opacity = '0';
+                            if (img) img.style.opacity = '1';
+                            const video = videoElement.querySelector('video');
+                            if (video) video.pause();
+                        });
+                    }
 
                     imageWrapper.appendChild(videoElement);
                 });

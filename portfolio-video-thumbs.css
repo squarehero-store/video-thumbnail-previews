@@ -1,6 +1,7 @@
 #gridThumbs {
   /* Squarespace native videos */
   /* YouTube/Vimeo iframes */
+  /*Remove opacity on hover*/
 }
 #gridThumbs .video-wrapper {
   position: absolute;
@@ -29,8 +30,9 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 150%;
-  height: 150%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+#gridThumbs .grid-item:hover .grid-image {
+  opacity: 1!important;
 }
