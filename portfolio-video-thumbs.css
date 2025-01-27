@@ -1,4 +1,10 @@
-#gridThumbs .video-wrapper {
+.image-wrapper,
+.grid-image-inner-wrapper,
+.summary-thumbnail-container {
+  position: relative;
+  overflow: hidden;
+}
+.video-wrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -6,13 +12,21 @@
   height: 100%;
   overflow: hidden;
   z-index: 1;
+  /* Remove default opacity 0 */
 }
-#gridThumbs .grid-image img {
+/* Style for external video wrappers only (YouTube/Vimeo) */
+.video-wrapper.external-video {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+/* Ensure images stay on top initially */
+img {
   position: relative;
   z-index: 2;
   transition: opacity 0.5s ease-in-out;
 }
-#gridThumbs .video-wrapper video {
+/* Squarespace native videos */
+.video-wrapper video {
   position: absolute;
   top: 0;
   left: 0;
@@ -21,13 +35,32 @@
   object-fit: cover;
   pointer-events: none;
 }
-#gridThumbs .video-wrapper iframe {
+/* YouTube/Vimeo iframes */
+.video-wrapper iframe {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  min-width: 100%;
+  min-height: 100%;
 }
-#gridThumbs .grid-item:hover .grid-image {
-  opacity: 1!important;
+/* Maintain image opacity on hover for container */
+.grid-item:hover .grid-image,
+.blog-item:hover .image-wrapper,
+.blog-basic-grid--container:hover .image-wrapper,
+.blog-single-column--container:hover .image-wrapper,
+.summary-item:hover .summary-thumbnail-container {
+  opacity: 1 !important;
+}
+/* For hover enabled videos */
+.video-wrapper.hover-enabled {
+  opacity: 0;
+}
+/* When external video is loaded */
+.video-wrapper.external-video.loaded {
+  opacity: 1;
+  z-index: 3;
 }
