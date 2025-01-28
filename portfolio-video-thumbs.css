@@ -11,19 +11,20 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 1;
-  /* Remove default opacity 0 */
+  z-index: 2;
 }
 /* Style for external video wrappers only (YouTube/Vimeo) */
 .video-wrapper.external-video {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
-/* Ensure images stay on top initially */
-img {
+/* Image always visible */
+.image-wrapper img,
+.grid-image-inner-wrapper img,
+.summary-thumbnail-container img {
   position: relative;
-  z-index: 2;
-  transition: opacity 0.5s ease-in-out;
+  z-index: 1;
+  opacity: 1 !important;
 }
 /* Squarespace native videos */
 .video-wrapper video {
@@ -47,7 +48,7 @@ img {
   min-width: 100%;
   min-height: 100%;
 }
-/* Maintain image opacity on hover for container */
+/* Remove hover opacity rules since image should always be visible */
 .grid-item:hover .grid-image,
 .blog-item:hover .image-wrapper,
 .blog-basic-grid--container:hover .image-wrapper,
@@ -58,9 +59,54 @@ img {
 /* For hover enabled videos */
 .video-wrapper.hover-enabled {
   opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 /* When external video is loaded */
 .video-wrapper.external-video.loaded {
   opacity: 1;
-  z-index: 3;
+}
+.demo-controls {
+  display: inline-block;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.demo-controls .toggle-switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.demo-controls .toggle-switch input {
+  display: none;
+}
+.demo-controls .slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 24px;
+  margin-right: 10px;
+  transition: background-color 0.3s;
+}
+.demo-controls .slider:before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+.demo-controls input:checked + .slider {
+  background-color: #ff0044;
+}
+.demo-controls input:checked + .slider:before {
+  transform: translateX(20px);
+}
+.demo-controls .toggle-label {
+  font-size: 14px;
+  color: #333;
 }
