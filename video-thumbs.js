@@ -1,7 +1,6 @@
 window.onload = function() {
-    console.info('🚀 SquareHero.store Video Thumbnails plugin loaded');
-
-    const videoMeta = document.querySelector('meta[squarehero-plugin="portfolio-video-thumbnails"]');
+    console.info('🚀 SquareHero.store Video Thumbnail Previews plugin loaded');
+    const videoMeta = document.querySelector('meta[squarehero-plugin="video-thumbnail-previews"]');
     const isEnabled = videoMeta ? videoMeta.getAttribute('enabled') === 'true' : false;
     const videoTarget = videoMeta ? videoMeta.getAttribute('target') || 'video-thumbnails' : 'video-thumbnails';
     const style = videoMeta ? videoMeta.getAttribute('style') : null;
@@ -9,10 +8,8 @@ window.onload = function() {
 
     if (isEnabled) {
         (function() {
-            // Store iframe references for resize handling
             const iframeRegistry = new Map();
 
-            // Resize handling functions - defined first
             function resizeIframe(iframe, container) {
                 const containerWidth = container.clientWidth;
                 const containerHeight = container.clientHeight;
@@ -52,7 +49,6 @@ window.onload = function() {
                 };
             }
 
-            // Handle window resize
             const handleResize = debounce(() => {
                 iframeRegistry.forEach((container, iframe) => {
                     resizeIframe(iframe, container);
@@ -61,7 +57,6 @@ window.onload = function() {
 
             window.addEventListener('resize', handleResize);
 
-            // Layout configurations
             const LAYOUTS = {
                 portfolio: {
                     container: '#gridThumbs',
@@ -156,16 +151,17 @@ window.onload = function() {
                             enableWorker: true,
                             lowLatencyMode: true
                         });
+
                         hls.loadSource(videoDetails.url);
                         hls.attachMedia(video);
+                        
                         if (!isHoverEnabled) {
                             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                                 video.play()
                                     .then(() => {
                                         if (img) img.style.opacity = '0';
                                         videoWrapper.style.opacity = '1';
-                                    })
-                                    .catch(console.error);
+                                    });
                             });
                         }
                     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -176,8 +172,7 @@ window.onload = function() {
                                     .then(() => {
                                         if (img) img.style.opacity = '0';
                                         videoWrapper.style.opacity = '1';
-                                    })
-                                    .catch(console.error);
+                                    });
                             });
                         }
                     }
@@ -200,7 +195,6 @@ window.onload = function() {
                     iframe.allow = 'autoplay; fullscreen; picture-in-picture';
                     iframe.setAttribute('allowfullscreen', '');
                     
-                    // Register iframe for resize handling
                     iframeRegistry.set(iframe, videoWrapper);
                     
                     iframe.addEventListener('load', () => {
@@ -235,9 +229,11 @@ window.onload = function() {
                         .filter(video => video.items?.[0]?.structuredContent)
                         .map(video => {
                             const content = video.items[0].structuredContent;
+                            
                             if (content._type === 'SqspHostedVideo') {
+                                const url = content.alexandriaUrl?.replace('{variant}', '') + 'playlist.m3u8';
                                 return [video.urlId, {
-                                    url: content.alexandriaUrl?.replace('{variant}', '') + 'playlist.m3u8',
+                                    url,
                                     provider: 'squarespace'
                                 }];
                             } else if (content.oembed) {
@@ -251,7 +247,7 @@ window.onload = function() {
                         .filter(Boolean)
                     );
 
-                    document.querySelectorAll(layout.item).forEach(item => {
+                    document.querySelectorAll(layout.item).forEach((item) => {
                         const projectId = layout.getProjectId(item);
                         if (!projectId) return;
 
@@ -269,7 +265,9 @@ window.onload = function() {
                                 videoElement.style.opacity = '1';
                                 if (img) img.style.opacity = '0';
                                 const video = videoElement.querySelector('video');
-                                if (video) video.play().catch(console.error);
+                                if (video) {
+                                    video.play();
+                                }
                             });
 
                             item.addEventListener('mouseleave', () => {
@@ -282,12 +280,9 @@ window.onload = function() {
 
                         imageWrapper.appendChild(videoElement);
                     });
-                } catch (error) {
-                    console.error('Error enhancing media:', error);
-                }
+                } catch (error) {}
             }
 
-            // Load required resources
             const link = document.createElement('link');
             link.rel = 'stylesheet';
             link.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/portfolio-video-thumbnails@0/portfolio-video-thumbs.min.css';
