@@ -285,7 +285,7 @@ window.onload = function() {
 
             const link = document.createElement('link');
             link.rel = 'stylesheet';
-            link.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/portfolio-video-thumbnails@0/portfolio-video-thumbs.min.css';
+            link.href = 'https://cdn.jsdelivr.net/gh/squarehero-store/portfolio-video-thumbnails@0/video-thumbs.min.css';
             document.head.appendChild(link);
 
             const hlsScript = document.createElement('script');
