@@ -1,12 +1,17 @@
 window.onload = function() {
     console.info('🚀 SquareHero.store Video Thumbnail Previews plugin loaded');
-    const videoMeta = document.querySelector('meta[squarehero-plugin="video-thumbnail-previews"]');
+    const videoMeta = document.querySelector('meta[squarehero-plugin="portfolio-video-thumbnails"]');
+    console.log('🔍 Meta tag found:', videoMeta);
     const isEnabled = videoMeta ? videoMeta.getAttribute('enabled') === 'true' : false;
+    console.log('✅ Plugin enabled:', isEnabled);
     const videoTarget = videoMeta ? videoMeta.getAttribute('target') || 'video-thumbnails' : 'video-thumbnails';
+    console.log('🎯 Video target page:', videoTarget);
     const style = videoMeta ? videoMeta.getAttribute('style') : null;
     const isHoverEnabled = style === 'hover';
+    console.log('🖱️ Hover mode:', isHoverEnabled);
 
     if (isEnabled) {
+        console.log('▶️ Starting plugin initialization...');
         (function() {
             const iframeRegistry = new Map();
 
@@ -120,17 +125,29 @@ window.onload = function() {
                         const link = item.querySelector('.summary-thumbnail-container');
                         return link ? link.href.split('/').filter(Boolean).pop() : null;
                     }
+                },
+                galleryStrips: {
+                    container: '.gallery-strips-wrapper',
+                    item: '.gallery-strips-item',
+                    imageWrapper: '.gallery-strips-item-wrapper',
+                    getProjectId: (item) => {
+                        const link = item.querySelector('.gallery-strips-image-link');
+                        return link ? link.href.split('/').filter(Boolean).pop() : null;
+                    }
                 }
             };
 
             function detectLayout() {
+                console.log('🔍 Detecting layout...');
                 for (const [key, config] of Object.entries(LAYOUTS)) {
                     const container = document.querySelector(config.container);
                     if (container) {
+                        console.log(`✅ Layout detected: ${key}`, config);
                         container.dataset.layoutType = key;
                         return config;
                     }
                 }
+                console.warn('❌ No matching layout found');
                 return null;
             }
 
@@ -222,8 +239,10 @@ window.onload = function() {
                 if (!layout) return;
 
                 try {
+                    console.log(`📡 Fetching video data from: /${videoTarget}?format=json`);
                     const response = await fetch(`/${videoTarget}?format=json`);
                     const videoData = await response.json();
+                    console.log('📦 Video data received:', videoData);
                     
                     const videoMap = new Map(videoData.items
                         .filter(video => video.items?.[0]?.structuredContent)
@@ -246,19 +265,35 @@ window.onload = function() {
                         })
                         .filter(Boolean)
                     );
+                    console.log('🗺️ Video map created:', Array.from(videoMap.entries()));
 
-                    document.querySelectorAll(layout.item).forEach((item) => {
+                    const items = document.querySelectorAll(layout.item);
+                    console.log(`🔢 Found ${items.length} items matching selector: ${layout.item}`);
+                    
+                    items.forEach((item, index) => {
                         const projectId = layout.getProjectId(item);
-                        if (!projectId) return;
+                        console.log(`📌 Item ${index + 1}: projectId = ${projectId}`);
+                        if (!projectId) {
+                            console.warn(`⚠️ Item ${index + 1}: No project ID found`);
+                            return;
+                        }
 
                         const videoDetails = videoMap.get(projectId);
-                        if (!videoDetails) return;
+                        if (!videoDetails) {
+                            console.warn(`⚠️ Item ${index + 1}: No video found for project ID: ${projectId}`);
+                            return;
+                        }
+                        console.log(`✅ Item ${index + 1}: Video matched!`, videoDetails);
 
                         const imageWrapper = item.querySelector(layout.imageWrapper);
-                        if (!imageWrapper) return;
+                        if (!imageWrapper) {
+                            console.warn(`⚠️ Item ${index + 1}: No image wrapper found with selector: ${layout.imageWrapper}`);
+                            return;
+                        }
 
                         const img = imageWrapper.querySelector('img');
                         const videoElement = createVideoElement(videoDetails, img);
+                        console.log(`🎬 Item ${index + 1}: Video element created, appending to DOM`);
                         
                         if (isHoverEnabled) {
                             item.addEventListener('mouseenter', () => {
@@ -280,7 +315,10 @@ window.onload = function() {
 
                         imageWrapper.appendChild(videoElement);
                     });
-                } catch (error) {}
+                    console.log('✨ Media enhancement complete');
+                } catch (error) {
+                    console.error('❌ Error enhancing media:', error);
+                }
             }
 
             const link = document.createElement('link');
