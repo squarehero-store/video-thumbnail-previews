@@ -134,6 +134,17 @@ window.onload = function() {
                         const link = item.querySelector('.gallery-strips-image-link');
                         return link ? link.href.split('/').filter(Boolean).pop() : null;
                     }
+                },
+                portfolioHover: {
+                    container: '.portfolio-hover',
+                    item: '.portfolio-hover-item',
+                    imageWrapper: '.portfolio-hover-bg-img',
+                    backgroundsWrapper: '.portfolio-hover-backgrounds-wrapper',
+                    separateImages: true,
+                    getProjectId: (item) => {
+                        const href = item.getAttribute('href');
+                        return href ? href.split('/').filter(Boolean).pop() : null;
+                    }
                 }
             };
 
@@ -270,6 +281,13 @@ window.onload = function() {
                     const items = document.querySelectorAll(layout.item);
                     console.log(`🔢 Found ${items.length} items matching selector: ${layout.item}`);
                     
+                    // For portfolioHover layout, get all image wrappers separately
+                    let imageWrappers = null;
+                    if (layout.separateImages) {
+                        imageWrappers = document.querySelectorAll(layout.imageWrapper);
+                        console.log(`🖼️ Found ${imageWrappers.length} separate image wrappers`);
+                    }
+                    
                     items.forEach((item, index) => {
                         const projectId = layout.getProjectId(item);
                         console.log(`📌 Item ${index + 1}: projectId = ${projectId}`);
@@ -285,7 +303,10 @@ window.onload = function() {
                         }
                         console.log(`✅ Item ${index + 1}: Video matched!`, videoDetails);
 
-                        const imageWrapper = item.querySelector(layout.imageWrapper);
+                        // Get image wrapper - either from item or by index for separate images
+                        const imageWrapper = layout.separateImages 
+                            ? imageWrappers[index] 
+                            : item.querySelector(layout.imageWrapper);
                         if (!imageWrapper) {
                             console.warn(`⚠️ Item ${index + 1}: No image wrapper found with selector: ${layout.imageWrapper}`);
                             return;
